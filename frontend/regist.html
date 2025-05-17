@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Register - Threads Diary</title>
+  <style>
+    body { font-family: Arial; max-width: 400px; margin: 20px auto; }
+    label, input { display: block; width: 100%; margin-bottom: 10px; }
+    input { padding: 8px; }
+    button { padding: 10px 20px; }
+  </style>
+</head>
+<body>
+  <h2>Register</h2>
+  <form id="registerForm">
+    <label>Username</label>
+    <input type="text" id="username" required />
+    <label>Email</label>
+    <input type="email" id="email" required />
+    <label>Password</label>
+    <input type="password" id="password" required />
+    <button type="submit">Register</button>
+  </form>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script>
+    $('#registerForm').on('submit', function(e) {
+      e.preventDefault(); // cegah submit beneran
+      // ambil value input
+      const username = $('#username').val();
+      const email = $('#email').val();
+      const password = $('#password').val();
+      // tampilkan alert dummy
+      alert(`Registrasi berhasil!\nUsername: ${username}\nEmail: ${email}`);
+      // reset form
+      this.reset();
+    });
+  </script>
+</body>
+</html>

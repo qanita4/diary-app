@@ -52,8 +52,13 @@ $(document).ready(function () {
   }
 });
 
-const apiUrl = 'http://localhost:8080/api';
+const apiUrl = process.env.API_URL || 'http://localhost:8080/api';
 const token = localStorage.getItem('token');
+const id = new URLSearchParams(window.location.search).get('id');
+if (!id) {
+  alert('ID postingan tidak ditemukan');
+  window.location.href = 'index.html';
+}
 
 // Helper: auth header
 function getAuthHeaders() {
@@ -130,19 +135,28 @@ if (window.location.pathname.includes('post.html')) {
   });
 }
 
+
 // DETAIL POSTINGAN
 if (window.location.pathname.includes('post-detail.html')) {
+  
   const id = new URLSearchParams(window.location.search).get('id');
 
-  function loadPost() {
-    $.ajax({
-      url: apiUrl + '/posts/' + id,
-      headers: getAuthHeaders(),
-      success: function (post) {
-        $('#detailTitle').text(post.title);
-        $('#detailContent').text(post.content);
-      }
-    });
+  async function loadPost() {
+    try {
+      const response = await fetch('${apiUrl}/posts/${id}', {
+        headers: getAuthHeaders()
+      });
+      if (!response.ok) throw new Error('Gagal memuat postingan');
+      const post = await response.json();
+      $('#detailTitle').text(post.title);
+      $('#detailContent').text(post.content);
+    } catch (error) {
+      alert(error.message);
+    }
+  }
+
+  function escapeHtml(text) {
+    return text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
 
   function loadComments() {
@@ -164,7 +178,11 @@ if (window.location.pathname.includes('post-detail.html')) {
   }
 
   $('#addCommentBtn').on('click', () => {
-    const comment = $('#newComment').val();
+    const comment = $('#newComment').val().trim();
+    if (!comment) {
+      alert('Komentar tidak boleh kosong');
+      return;
+    }
     $.ajax({
       url: `${apiUrl}/posts/${id}/comments`,
       method: 'POST',
@@ -176,7 +194,8 @@ if (window.location.pathname.includes('post-detail.html')) {
       success: () => {
         $('#newComment').val('');
         loadComments();
-      }
+      },
+      error: () => alert('Gagal menambahkan komentar')
     });
   });
 
@@ -203,10 +222,12 @@ if (window.location.pathname.includes('post-detail.html')) {
       url: apiUrl + `/comments/${commentId}`,
       method: 'DELETE',
       headers: getAuthHeaders(),
-      success: () => loadComments()
+      success: () => loadComments(),
+      error: () => alert('Gagal menghapus komentar')
     });
   };
 
   loadPost();
   loadComments();
+
 }
